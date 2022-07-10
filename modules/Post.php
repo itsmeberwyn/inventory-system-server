@@ -8,8 +8,25 @@ class Post
         $this->pdo = $pdo;
     }
 
-    public function testPost($data): array
+    // inventory
+    public function addProduct($product)
     {
-        return ["status" => "post ok"];
+    }
+
+    public function addPurchase($product)
+    {
+    }
+
+    public function addSupplier($supplier)
+    {
+    }
+
+    // pos
+    public function addOrder($order)
+    {
+    }
+
+    public function addTransaction($order)
+    {
     }
 }

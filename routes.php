@@ -55,7 +55,6 @@ class Route
 
         try {
             echo match ($req[0]) {
-                'testpost' => json_encode($this->post->testPost($data)),
                 'admin-register' => json_encode($this->auth->admin_register($data)),
                 'admin-login' => json_encode($this->auth->admin_login($data)),
                 default => errorMessage(403)
@@ -70,7 +69,6 @@ class Route
     {
         try {
             echo match ($req[0]) {
-                'testget' => json_encode($this->get->testGet()),
                 default => errorMessage(403)
             };
         } catch (Exception $e) {
