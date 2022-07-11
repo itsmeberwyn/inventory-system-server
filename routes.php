@@ -57,10 +57,12 @@ class Route
             echo match ($req[0]) {
                 'admin-register' => json_encode($this->auth->admin_register($data)),
                 'admin-login' => json_encode($this->auth->admin_login($data)),
+                'add-transaction' => json_encode($this->post->addTransaction($data)),
                 default => errorMessage(403)
             };
         } catch (Exception $e) {
             echo errorMessage(401);
+            // echo $e;
             return;
         }
     }

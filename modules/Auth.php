@@ -75,7 +75,7 @@ class Auth extends AuthMiddleware
             $payload = [
                 'user_id' => $res['id'],
                 'username' => $res['username'],
-                'role' => 'admin',
+                'role' => $res['role'],
                 'access_token' => $jwt,
             ];
             $code = 200;
