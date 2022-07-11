@@ -23,7 +23,7 @@ function errorMessage($errCode)
 
 function response($payload, $remarks, $message, $code)
 {
-    $status = ['remarks' => 'success', "message" => $message];
+    $status = ['remarks' => $remarks, "message" => $message];
     http_response_code($code);
     return ['status' => $status, 'payload' => $payload, 'timestamp' => date_create()];
 }
