@@ -1,6 +1,17 @@
+
 <?php
 class Get
 {
+    // NOTE: missing method!
+    // sales report
+    // first page->fetching revenue data 
+    // second page->cards data 
+
+    // NOTE: SUGGESTIONS!
+    // sales report
+    // possible to use params for dymanic change of data
+    // possible to add data picker to sales report page
+
     protected $pdo;
 
     public function __construct(\PDO $pdo)
@@ -115,6 +126,7 @@ class Get
 
     // sales report
     // first page of sales report
+    // sold items today
     public function get_Orders_Today()
     {
         $payload = [];
@@ -142,6 +154,7 @@ class Get
         return response($payload, $remarks, $message, $code);
     }
 
+    // total customers today
     public function get_Transactions_Today()
     {
         $payload = [];
@@ -170,6 +183,7 @@ class Get
         return response($payload, $remarks, $message, $code);
     }
 
+    // top selling products today
     public function get_Top_Selling_Products_Today()
     {
         $payload = [];
@@ -203,6 +217,7 @@ class Get
         return response($payload, $remarks, $message, $code);
     }
 
+    // sales by categories
     public function get_Sales_By_Categories_Today()
     {
         $payload = [];
@@ -238,6 +253,7 @@ class Get
     }
 
     // second page of sales report
+    // top selling products month
     public function get_Top_Selling_Products_Month()
     {
         $payload = [];
@@ -272,6 +288,7 @@ class Get
         return response($payload, $remarks, $message, $code);
     }
 
+    // top selling by categories / month
     public function get_Sales_By_Categories_Month()
     {
         $payload = [];
@@ -346,6 +363,7 @@ class Get
         return response($payload, $remarks, $message, $code);
     }
 
+    // sales from last year to current year
     public function get_Transactions_Current_Last_Year()
     {
         $payload = [];
@@ -396,6 +414,7 @@ class Get
         return response($payload, $remarks, $message, $code);
     }
 
+    // purchases from last year to current year
     public function get_Purchases_Current_Last_Year()
     {
         $payload = [];
@@ -457,6 +476,7 @@ class Get
         return response($payload, $remarks, $message, $code);
     }
 
+    // total customer from last year to current year
     public function get_Customers_Current_Last_Year()
     {
         $payload = [];
@@ -530,7 +550,7 @@ class Get
         $remarks = 'failed';
         $message = 'Failed to get inventory orders';
 
-        $sql = "SELECT SUM(orders.quantity) as quantitySold
+        $sql = "SELECT SUM(orders.quantity) as quantitySold, SUM(orders.subTotal) as revenue
         FROM transactions, orders 
         WHERE YEAR(transactions.created_at) = YEAR(CURRENT_DATE())
             AND orders.transactionId=transactions.id 
@@ -594,6 +614,7 @@ class Get
         return response($payload, $remarks, $message, $code);
     }
 
+    // total customers count
     public function get_Transactions_Current_Year()
     {
         $payload = [];
@@ -615,6 +636,67 @@ class Get
             } else {
                 $message = 'No records found for customers information';
             }
+        } catch (\PDOException $e) {
+            $message = $e->getMessage();
+            $code = 403;
+        }
+
+        return response($payload, $remarks, $message, $code);
+    }
+
+    // summary
+    public function summary()
+    {
+
+        $summaryMonth = array_fill(0, 12, array_fill(0, 4, 0));
+
+        $payload = [];
+        $code = 404;
+        $remarks = 'failed';
+        $message = 'Failed to get the summary information from the database';
+
+        $sql = "SELECT SUM(orders.quantity) as soldItems, SUM(orders.subTotal) AS sales, MONTH(transactions.created_at) AS month
+        FROM transactions, orders
+        WHERE YEAR(transactions.created_at) = YEAR(CURDATE())
+            AND orders.transactionId=transactions.id 
+            AND transactions.is_deleted IS NULL
+            GROUP BY MONTH(transactions.created_at)";
+
+
+        $sq1 = "SELECT COUNT(transactions.id) as totalCustomers, MONTH(transactions.created_at) AS month
+        FROM transactions
+        WHERE YEAR(transactions.created_at) = YEAR(CURDATE())
+            AND transactions.is_deleted IS NULL
+            GROUP BY MONTH(transactions.created_at)";
+
+        $sql2 = "SELECT SUM(purchases.quantityBought)*purchases.price as cost, MONTH(purchases.created_at) AS month
+        FROM purchases 
+        WHERE YEAR(purchases.created_at) = YEAR(CURRENT_DATE())
+            AND purchases.is_deleted IS NULL
+            GROUP BY purchases.productId";
+
+        try {
+            if ($res = $this->pdo->query($sql)->fetchAll()) {
+                foreach ($res as $row) {
+                    $summaryMonth[$row['month'] - 1][0] = $row['soldItems'];
+                    $summaryMonth[$row['month'] - 1][3] = $row['sales'];
+                }
+            }
+            if ($res = $this->pdo->query($sq1)->fetchAll()) {
+                foreach ($res as $row) {
+                    $summaryMonth[$row['month'] - 1][1] = $row['totalCustomers'];
+                }
+            }
+            if ($res = $this->pdo->query($sql2)->fetchAll()) {
+                foreach ($res as $row) {
+                    $summaryMonth[$row['month'] - 1][2] = $row['cost'];
+                }
+            }
+
+            $payload = $summaryMonth;
+            $code = 200;
+            $remarks = "success";
+            $message = "Successfully retrieved the summary information";
         } catch (\PDOException $e) {
             $message = $e->getMessage();
             $code = 403;
