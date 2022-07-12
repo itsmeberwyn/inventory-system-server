@@ -18,7 +18,7 @@ class Post
         $message = 'Failed to add category to database';
 
         $sql = 'INSERT INTO categories (categoryName, description) VALUES (?,?)';
-        $sql = $this->db->prepare($sql);
+        $sql = $this->pdo->prepare($sql);
         $sql->execute([
             $category->categoryName,
             $category->description,

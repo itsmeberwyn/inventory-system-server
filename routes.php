@@ -80,6 +80,18 @@ class Route
     {
         try {
             echo match ($req[0]) {
+                'get-categories' => json_encode($this->get->get_Categories()),
+                'get-products' => json_encode($this->get->get_Products()),
+                'get-purchases' => json_encode($this->get->get_Purchases()),
+                'get-suppliers' => json_encode($this->get->get_Suppliers()),
+                'get-orders-today' => json_encode($this->get->get_Orders_Today()),
+                'get-customers-today' => json_encode($this->get->get_Transactions_Today()),
+                'get-topselling-today' => json_encode($this->get->get_Top_Selling_Products_Today()),
+                'get-topsellingcat-today' => json_encode($this->get->get_Sales_By_Categories_Today()),
+                'get-topselling-month' => json_encode($this->get->get_Top_Selling_Products_Month()),
+                'get-topsellingcat-month' => json_encode($this->get->get_Sales_By_Categories_Month()),
+                'get-sales-month' => json_encode($this->get->get_Transactions_Month()),
+                'get-sales-year' => json_encode($this->get->get_Transactions_Current_Last_Year()),
                 default => errorMessage(403)
             };
         } catch (Exception $e) {
