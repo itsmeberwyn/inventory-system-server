@@ -97,6 +97,7 @@ class Route
                 'get-orders-curyear' => json_encode($this->get->get_Orders_Current_Year()),
                 'get-purchases-curyear' => json_encode($this->get->get_Purchases_Current_Year()),
                 'get-transactions-curyear' => json_encode($this->get->get_Transactions_Current_Year()),
+                'get-summary' => json_encode($this->get->summary()),
                 default => errorMessage(403)
             };
         } catch (Exception $e) {
