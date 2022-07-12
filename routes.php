@@ -92,6 +92,11 @@ class Route
                 'get-topsellingcat-month' => json_encode($this->get->get_Sales_By_Categories_Month()),
                 'get-sales-month' => json_encode($this->get->get_Transactions_Month()),
                 'get-sales-year' => json_encode($this->get->get_Transactions_Current_Last_Year()),
+                'get-expenses-year' => json_encode($this->get->get_Purchases_Current_Last_Year()),
+                'get-customers-year' => json_encode($this->get->get_Customers_Current_Last_Year()),
+                'get-orders-curyear' => json_encode($this->get->get_Orders_Current_Year()),
+                'get-purchases-curyear' => json_encode($this->get->get_Purchases_Current_Year()),
+                'get-transactions-curyear' => json_encode($this->get->get_Transactions_Current_Year()),
                 default => errorMessage(403)
             };
         } catch (Exception $e) {
