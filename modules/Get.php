@@ -1,6 +1,9 @@
 
 <?php
-class Get
+
+require_once('./middleware/Auth.Middleware.php');
+
+class Get extends AuthMiddleware
 {
     // NOTE: missing method!
     // sales report

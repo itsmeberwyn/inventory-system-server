@@ -67,6 +67,7 @@ class Route
                 'add-purchases' => json_encode($this->post->addPurchases($data)),
                 'add-transaction' => json_encode($this->post->addTransaction($data)),
                 'add-supplier' => json_encode($this->post->addSupplier($data)),
+                'refreshtoken' => json_encode($this->auth->refreshToken()),
                 default => errorMessage(403)
             };
         } catch (Exception $e) {
@@ -81,7 +82,7 @@ class Route
         try {
             echo match ($req[0]) {
                 'get-categories' => json_encode($this->get->get_Categories()),
-                'get-products' => json_encode($this->get->get_Products()),
+                'get-products' => json_encode($this->get->AuthMiddleware()->get_Products()),
                 'get-purchases' => json_encode($this->get->get_Purchases()),
                 'get-suppliers' => json_encode($this->get->get_Suppliers()),
                 'get-orders-today' => json_encode($this->get->get_Orders_Today()),
