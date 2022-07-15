@@ -60,7 +60,33 @@ class Get extends AuthMiddleware
 
         try {
             if ($res = $this->pdo->query($sql)->fetchAll()) {
-                $payload = $res;
+                $payload = array_chunk($res, 6);
+                $code = 200;
+                $remarks = "success";
+                $message = "Successfully retrieved inventory products";
+            } else {
+                $message = 'No records found for category information';
+            }
+        } catch (\PDOException $e) {
+            $message = $e->getMessage();
+            $code = 403;
+        }
+
+        return response($payload, $remarks, $message, $code);
+    }
+
+    public function get_Products_Large()
+    {
+        $payload = [];
+        $code = 404;
+        $remarks = 'failed';
+        $message = 'Failed to get inventory products';
+
+        $sql = "SELECT * FROM products WHERE is_deleted IS NULL";
+
+        try {
+            if ($res = $this->pdo->query($sql)->fetchAll()) {
+                $payload = array_chunk($res, 8);
                 $code = 200;
                 $remarks = "success";
                 $message = "Successfully retrieved inventory products";

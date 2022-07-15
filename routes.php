@@ -82,7 +82,8 @@ class Route
         try {
             echo match ($req[0]) {
                 'get-categories' => json_encode($this->get->get_Categories()),
-                'get-products' => json_encode($this->get->AuthMiddleware()->get_Products()),
+                'get-products' => json_encode($this->get->get_Products()),
+                'get-products-large' => json_encode($this->get->get_Products_Large()),
                 'get-purchases' => json_encode($this->get->get_Purchases()),
                 'get-suppliers' => json_encode($this->get->get_Suppliers()),
                 'get-orders-today' => json_encode($this->get->get_Orders_Today()),
