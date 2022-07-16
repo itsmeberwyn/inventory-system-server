@@ -71,7 +71,8 @@ class Route
                 default => errorMessage(403)
             };
         } catch (Exception $e) {
-            echo errorMessage(401);
+            // echo errorMessage(401);
+            echo $e;
 
             return;
         }
@@ -85,6 +86,7 @@ class Route
                 'get-products' => json_encode($this->get->get_Products()),
                 'get-products-large' => json_encode($this->get->get_Products_Large()),
                 'get-purchases' => json_encode($this->get->get_Purchases()),
+                'get-transactions' => json_encode($this->get->get_Transactions()),
                 'get-suppliers' => json_encode($this->get->get_Suppliers()),
                 'get-orders-today' => json_encode($this->get->get_Orders_Today()),
                 'get-customers-today' => json_encode($this->get->get_Transactions_Today()),

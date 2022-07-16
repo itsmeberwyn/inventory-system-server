@@ -284,14 +284,56 @@ class Patch
     public function updateOrder($orders)
     {
         foreach ($orders as $d) {
-            $sql = "UPDATE orders SET quantity=?, subTotal=? WHERE id=?";
+            if ($d->orderId != 0) {
+                if ($d->quantity > $d->origQuantity && $d->is_deleted !== 1) {
+                    $updateSql = "UPDATE products SET quantity=quantity-? WHERE id=?";
+                    $updateSql = $this->pdo->prepare($updateSql);
+                    $updateSql->execute([
+                        abs($d->quantity - $d->origQuantity),
+                        $d->productId,
+                    ]);
+                } else if ($d->quantity < $d->origQuantity && $d->is_deleted !== 1) {
+                    $updateSql = "UPDATE products SET quantity=quantity+? WHERE id=?";
+                    $updateSql = $this->pdo->prepare($updateSql);
+                    $updateSql->execute([
+                        abs($d->quantity - $d->origQuantity),
+                        $d->productId,
+                    ]);
+                }
 
-            $sql = $this->pdo->prepare($sql);
-            $sql->execute([
-                $d->quantity,
-                $d->subTotal,
-                $d->orderId,
-            ]);
+                if ($d->is_deleted === 1) {
+                    $updateSql = "UPDATE products SET quantity=quantity+? WHERE id=?";
+                    $updateSql = $this->pdo->prepare($updateSql);
+                    $updateSql->execute([
+                        abs($d->origQuantity),
+                        $d->productId,
+                    ]);
+                }
+
+                $sql = "UPDATE orders SET quantity=?, subTotal=?, is_deleted=? WHERE id=?";
+
+
+                $sql = $this->pdo->prepare($sql);
+                $sql->execute([
+                    $d->quantity,
+                    $d->subTotal,
+                    $d->is_deleted,
+                    $d->orderId,
+                ]);
+            } else {
+                $updateSql = "UPDATE products SET quantity=quantity-$d->quantity WHERE id=$d->productId";
+                $updateSql = $this->pdo->prepare($updateSql);
+                $updateSql->execute([]);
+
+                $sql = "INSERT INTO orders (productId, transactionId, quantity, subTotal) VALUES (?,?,?,?)";
+                $sql = $this->pdo->prepare($sql);
+                $sql->execute([
+                    $d->productId,
+                    $d->transactionId,
+                    $d->quantity,
+                    $d->subTotal,
+                ]);
+            }
         }
 
         $count = $sql->rowCount();

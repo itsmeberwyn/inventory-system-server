@@ -151,6 +151,10 @@ class Post
 
         $orderDetails = array();
         foreach ($orders as $d) {
+            $updateSql = "UPDATE products SET quantity = quantity-$d->quantity WHERE id=$d->productId";
+            $updateSql = $this->pdo->prepare($updateSql);
+            $updateSql->execute();
+
             $question_marks[] = '('  . $this->placeholders('?', sizeof($datafields)) . ')';
             $orderDetails[] = $d->productId;
             $orderDetails[] = $transactionId;

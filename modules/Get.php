@@ -136,6 +136,37 @@ class Get extends AuthMiddleware
         return response($payload, $remarks, $message, $code);
     }
 
+    public function get_Transactions()
+    {
+        $payload = [];
+        $code = 404;
+        $remarks = 'failed';
+        $message = 'Failed to get inventory orders';
+
+        $sql = "SELECT transactions.*, products.id as productId, products.productName, products.price, orders.id as orderId, orders.quantity, orders.subTotal FROM transactions, orders, products WHERE transactions.id=orders.transactionId AND orders.productId=products.id AND transactions.is_deleted IS NULL AND orders.is_deleted IS NULL ORDER BY transactions.created_at DESC";
+
+        try {
+            if ($res = $this->pdo->query($sql)->fetchAll()) {
+                $result = [];
+                foreach ($res as $row) {
+                    $result[$row['id']][] = $row;
+                }
+
+                $payload = array_chunk($result, 8);
+                $code = 200;
+                $remarks = "success";
+                $message = "Successfully retrieved purchases";
+            } else {
+                $message = 'No records found for purchases';
+            }
+        } catch (\PDOException $e) {
+            $message = $e->getMessage();
+            $code = 403;
+        }
+
+        return response($payload, $remarks, $message, $code);
+    }
+
     public function get_Suppliers()
     {
         $payload = [];
