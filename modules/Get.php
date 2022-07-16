@@ -31,6 +31,10 @@ class Get extends AuthMiddleware
         $message = 'Failed to get inventory category information';
 
         $sql = "SELECT * FROM categories";
+        $sql = "SELECT categories.categoryName, categories.id, COUNT(products.categoryId) AS 'count'
+        FROM categories 
+          LEFT JOIN products ON categories.id = products.categoryId
+        GROUP BY categories.id;";
 
         try {
             if ($res = $this->pdo->query($sql)->fetchAll()) {
