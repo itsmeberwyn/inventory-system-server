@@ -117,6 +117,8 @@ class Route
                 'update-orders' => json_encode($this->patch->updateTransaction($data)),
                 'update-product' => json_encode($this->patch->updateProduct($data)),
                 'update-supplier' => json_encode($this->patch->updateSupplier($data)),
+                'update-purchase' => json_encode($this->patch->updatePurchase($data)),
+                'delete-purchase' => json_encode($this->patch->deletePurchase($data)),
                 'delete-product' => json_encode($this->patch->deleteProduct($data)),
                 'delete-supplier' => json_encode($this->patch->deleteSupplier($data)),
                 'delete-order' => json_encode($this->patch->deleteTransaction($data)),

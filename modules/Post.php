@@ -128,9 +128,14 @@ class Post
         ]);
 
         $count = $sql->rowCount();
+        $supplierId = $this->pdo->lastInsertId();
+        $date = date('Y-m-d h:i:s', time());
+
+        $supplier->id = $supplierId;
+        $supplier->created_at = $date;
 
         if ($count) {
-            $payload = [$supplier];
+            $payload = $supplier;
             $code = 200;
             $remarks = 'success';
             $message = 'Supplier was successfully added to the database.';

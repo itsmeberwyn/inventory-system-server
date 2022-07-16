@@ -108,11 +108,16 @@ class Get extends AuthMiddleware
         $remarks = 'failed';
         $message = 'Failed to get inventory purchases';
 
-        $sql = "SELECT * FROM purchases WHERE is_deleted IS NULL";
+        $sql = "SELECT purchases.*, products.productName FROM purchases, products WHERE products.id=purchases.productId AND purchases.is_deleted IS NULL ORDER BY purchases.created_at DESC";
 
         try {
             if ($res = $this->pdo->query($sql)->fetchAll()) {
-                $payload = $res;
+                $result = [];
+                foreach ($res as $row) {
+                    $result[$row['purchaseSerialId']][] = $row;
+                }
+
+                $payload = array_chunk($result, 8);
                 $code = 200;
                 $remarks = "success";
                 $message = "Successfully retrieved purchases";
@@ -138,7 +143,7 @@ class Get extends AuthMiddleware
 
         try {
             if ($res = $this->pdo->query($sql)->fetchAll()) {
-                $payload = $res;
+                $payload = array_chunk($res, 8);
                 $code = 200;
                 $remarks = "success";
                 $message = "Successfully retrieved suppliers information";

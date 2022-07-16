@@ -74,7 +74,7 @@ class Patch
                 $supplier->supplierName,
                 $supplier->contact,
                 $supplier->location,
-                $supplier->supplierId,
+                $supplier->id,
             ]);
 
             $count = $sql->rowCount();
@@ -169,6 +169,103 @@ class Patch
                 $message = 'Product was deleted successfully to the database.';
             } else {
                 $payload = $supplier;
+                $code = 200;
+                $remarks = 'success';
+                $message = 'Nothing was deleted to the database.';
+            }
+
+            $this->pdo->commit();
+            return response($payload, $remarks, $message, $code);
+        } catch (\PDOException $e) {
+            $this->pdo->rollback();
+        }
+        return response($payload, $remarks, $message, $code);
+    }
+
+    public function updatePurchase($purchase)
+    {
+        $payload = [];
+        $code = 424;
+        $remarks = 'failed';
+        $message = 'Failed to update transaction';
+
+        try {
+            $this->pdo->beginTransaction();
+
+            foreach ($purchase as $d) {
+                if ($d->id == 0) {
+                    $sql = "INSERT INTO purchases (purchaseSerialId,productId,supplierId,price,quantityBought) VALUES (?,?,?,?,?)";
+                    $sql = $this->pdo->prepare($sql);
+                    $sql->execute([
+                        $d->purchaseSerialId,
+                        $d->productId,
+                        $d->supplierId,
+                        $d->price,
+                        $d->quantityBought,
+                    ]);
+                } else {
+                    $sql = "UPDATE purchases SET quantityBought=?, is_deleted=? WHERE id=?";
+                    $sql = $this->pdo->prepare($sql);
+                    $sql->execute([
+                        $d->quantityBought,
+                        $d->is_deleted,
+                        $d->id,
+                    ]);
+                }
+            }
+
+            $count = $sql->rowCount();
+
+            if ($count) {
+                $payload = $purchase;
+                $code = 200;
+                $remarks = 'success';
+                $message = 'Purchase was updated successfully to the database.';
+            } else {
+                $payload = $purchase;
+                $code = 200;
+                $remarks = 'success';
+                $message = 'Nothing was updated to the database.';
+            }
+
+            $this->pdo->commit();
+            return response($payload, $remarks, $message, $code);
+        } catch (\PDOException $e) {
+            $this->pdo->rollback();
+            throw $e;
+        }
+
+        return response($payload, $remarks, $message, $code);
+    }
+
+
+    public function deletePurchase($purchase)
+    {
+        $payload = [];
+        $code = 400;
+        $remarks = 'failed';
+        $message = 'Failed to delete purchase to database';
+
+        try {
+            $this->pdo->beginTransaction();
+
+            $sql = 'UPDATE purchases SET is_deleted=? WHERE purchaseSerialId=? AND is_deleted IS NULL';
+
+            $sql = $this->pdo->prepare($sql);
+            $sql->execute([
+                1,
+                $purchase->purchaseId,
+            ]);
+
+            $count = $sql->rowCount();
+
+            if ($count) {
+                $payload = $purchase;
+                $code = 200;
+                $remarks = 'success';
+                $message = 'Purcjase was deleted successfully to the database.';
+            } else {
+                $payload = $purchase;
                 $code = 200;
                 $remarks = 'success';
                 $message = 'Nothing was deleted to the database.';
