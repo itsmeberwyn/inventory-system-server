@@ -128,9 +128,14 @@ class Post
         ]);
 
         $count = $sql->rowCount();
+        $supplierId = $this->pdo->lastInsertId();
+        $date = date('Y-m-d h:i:s', time());
+
+        $supplier->id = $supplierId;
+        $supplier->created_at = $date;
 
         if ($count) {
-            $payload = [$supplier];
+            $payload = $supplier;
             $code = 200;
             $remarks = 'success';
             $message = 'Supplier was successfully added to the database.';
@@ -146,6 +151,10 @@ class Post
 
         $orderDetails = array();
         foreach ($orders as $d) {
+            $updateSql = "UPDATE products SET quantity = quantity-$d->quantity WHERE id=$d->productId";
+            $updateSql = $this->pdo->prepare($updateSql);
+            $updateSql->execute();
+
             $question_marks[] = '('  . $this->placeholders('?', sizeof($datafields)) . ')';
             $orderDetails[] = $d->productId;
             $orderDetails[] = $transactionId;

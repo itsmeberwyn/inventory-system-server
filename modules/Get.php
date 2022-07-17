@@ -1,6 +1,9 @@
 
 <?php
-class Get
+
+require_once('./middleware/Auth.Middleware.php');
+
+class Get extends AuthMiddleware
 {
     // NOTE: missing method!
     // sales report
@@ -28,6 +31,10 @@ class Get
         $message = 'Failed to get inventory category information';
 
         $sql = "SELECT * FROM categories";
+        $sql = "SELECT categories.categoryName, categories.id, COUNT(products.categoryId) AS 'count'
+        FROM categories 
+          LEFT JOIN products ON categories.id = products.categoryId
+        GROUP BY categories.id;";
 
         try {
             if ($res = $this->pdo->query($sql)->fetchAll()) {
@@ -57,7 +64,33 @@ class Get
 
         try {
             if ($res = $this->pdo->query($sql)->fetchAll()) {
-                $payload = $res;
+                $payload = array_chunk($res, 6);
+                $code = 200;
+                $remarks = "success";
+                $message = "Successfully retrieved inventory products";
+            } else {
+                $message = 'No records found for category information';
+            }
+        } catch (\PDOException $e) {
+            $message = $e->getMessage();
+            $code = 403;
+        }
+
+        return response($payload, $remarks, $message, $code);
+    }
+
+    public function get_Products_Large()
+    {
+        $payload = [];
+        $code = 404;
+        $remarks = 'failed';
+        $message = 'Failed to get inventory products';
+
+        $sql = "SELECT * FROM products WHERE is_deleted IS NULL";
+
+        try {
+            if ($res = $this->pdo->query($sql)->fetchAll()) {
+                $payload = array_chunk($res, 8);
                 $code = 200;
                 $remarks = "success";
                 $message = "Successfully retrieved inventory products";
@@ -79,11 +112,47 @@ class Get
         $remarks = 'failed';
         $message = 'Failed to get inventory purchases';
 
-        $sql = "SELECT * FROM purchases WHERE is_deleted IS NULL";
+        $sql = "SELECT purchases.*, products.productName FROM purchases, products WHERE products.id=purchases.productId AND purchases.is_deleted IS NULL ORDER BY purchases.created_at DESC";
 
         try {
             if ($res = $this->pdo->query($sql)->fetchAll()) {
-                $payload = $res;
+                $result = [];
+                foreach ($res as $row) {
+                    $result[$row['purchaseSerialId']][] = $row;
+                }
+
+                $payload = array_chunk($result, 8);
+                $code = 200;
+                $remarks = "success";
+                $message = "Successfully retrieved purchases";
+            } else {
+                $message = 'No records found for purchases';
+            }
+        } catch (\PDOException $e) {
+            $message = $e->getMessage();
+            $code = 403;
+        }
+
+        return response($payload, $remarks, $message, $code);
+    }
+
+    public function get_Transactions()
+    {
+        $payload = [];
+        $code = 404;
+        $remarks = 'failed';
+        $message = 'Failed to get inventory orders';
+
+        $sql = "SELECT transactions.*, products.id as productId, products.productName, products.price, orders.id as orderId, orders.quantity, orders.subTotal FROM transactions, orders, products WHERE transactions.id=orders.transactionId AND orders.productId=products.id AND transactions.is_deleted IS NULL AND orders.is_deleted IS NULL ORDER BY transactions.created_at DESC";
+
+        try {
+            if ($res = $this->pdo->query($sql)->fetchAll()) {
+                $result = [];
+                foreach ($res as $row) {
+                    $result[$row['id']][] = $row;
+                }
+
+                $payload = array_chunk($result, 8);
                 $code = 200;
                 $remarks = "success";
                 $message = "Successfully retrieved purchases";
@@ -109,7 +178,7 @@ class Get
 
         try {
             if ($res = $this->pdo->query($sql)->fetchAll()) {
-                $payload = $res;
+                $payload = array_chunk($res, 8);
                 $code = 200;
                 $remarks = "success";
                 $message = "Successfully retrieved suppliers information";
@@ -385,26 +454,58 @@ class Get
         GROUP BY MONTH(transactions.created_at);";
 
         try {
+            $dataLastYear = array_fill(0, 12, 0);
+            $dataCurrentYear = array_fill(0, 12, 0);
             if ($res1 = $this->pdo->query($sql1)->fetchAll()) {
-                $dataLastYear = array_fill(0, 12, 0);
-                $dataCurrentYear = array_fill(0, 12, 0);
                 foreach ($res1 as $lastyeardata) {
                     $dataLastYear[$lastyeardata['month'] - 1] = $lastyeardata['sales'];
                 }
-                if ($res2 = $this->pdo->query($sql2)->fetchAll()) {
-                    foreach ($res2 as $currentyeardata) {
-                        $dataCurrentYear[$currentyeardata['month'] - 1] = $currentyeardata['sales'];
-                    }
+            }
+            if ($res2 = $this->pdo->query($sql2)->fetchAll()) {
+                foreach ($res2 as $currentyeardata) {
+                    $dataCurrentYear[$currentyeardata['month'] - 1] = $currentyeardata['sales'];
+                }
+            }
+            $payload = [
+                (date('Y') - 1) => $dataLastYear,
+                date('Y') => $dataCurrentYear,
+            ];
+            $code = 200;
+            $remarks = "success";
+            $message = "Successfully retrieved sales";
+        } catch (\PDOException $e) {
+            $message = $e->getMessage();
+            $code = 403;
+        }
+
+        return response($payload, $remarks, $message, $code);
+    }
+
+    public function get_detail_Current_Year()
+    {
+        $payload = [];
+        $code = 404;
+        $remarks = 'failed';
+        $message = 'Failed to get sales from the database';
+
+        $sql = "SELECT SUM(orders.subTotal) as sales, SUM(orders.quantity) as soldItems, MONTH(transactions.created_at) AS month 
+        FROM transactions, orders
+        WHERE YEAR(transactions.created_at) = YEAR(CURDATE()) 
+            AND orders.transactionId=transactions.id 
+        GROUP BY MONTH(transactions.created_at);";
+
+        try {
+            $dataCurrentYear = array_fill(0, 12, ["sales" => 0, "soldItems" => 0]);
+            if ($res1 = $this->pdo->query($sql)->fetchAll()) {
+                foreach ($res1 as $data) {
+                    $dataCurrentYear[$data['month'] - 1] = ["sales" => $data['sales'], "soldItems" => $data['soldItems']];
                 }
                 $payload = [
-                    (date('Y') - 1) => $dataLastYear,
                     date('Y') => $dataCurrentYear,
                 ];
                 $code = 200;
                 $remarks = "success";
                 $message = "Successfully retrieved sales";
-            } else {
-                $message = 'No records found for sales';
             }
         } catch (\PDOException $e) {
             $message = $e->getMessage();
@@ -435,15 +536,15 @@ class Get
         GROUP BY MONTH(purchases.created_at);";
 
         try {
+            $dataLastYear = array_fill(0, 12, 0);
+            $dataCurrentYear = array_fill(0, 12, 0);
             if ($res1 = $this->pdo->query($sql1)->fetchAll()) {
-                $dataLastYear = array_fill(0, 12, 0);
-                $dataCurrentYear = array_fill(0, 12, 0);
                 foreach ($res1 as $lastyeardata) {
-                    $dataLastYear[$lastyeardata['month'] - 1] = $lastyeardata['sales'] * $lastyeardata['price'];
+                    $dataLastYear[$lastyeardata['month'] - 1] = $lastyeardata['expenses'] * $lastyeardata['price'];
                 }
                 if ($res2 = $this->pdo->query($sql2)->fetchAll()) {
                     foreach ($res2 as $currentyeardata) {
-                        $dataCurrentYear[$currentyeardata['month'] - 1] = $currentyeardata['sales'] * $currentyeardata['price'];
+                        $dataCurrentYear[$currentyeardata['month'] - 1] = $currentyeardata['expenses'] * $currentyeardata['price'];
                     }
                 }
                 $payload = [
@@ -459,7 +560,7 @@ class Get
                     $dataCurrentYear[$currentyeardata['month'] - 1] = $currentyeardata['expenses'] * $currentyeardata['price'];
                 }
                 $payload = [
-                    (date('Y') - 1) => [],
+                    (date('Y') - 1) => $dataLastYear,
                     date('Y') => $dataCurrentYear,
                 ];
                 $code = 200;
@@ -697,6 +798,79 @@ class Get
             $code = 200;
             $remarks = "success";
             $message = "Successfully retrieved the summary information";
+        } catch (\PDOException $e) {
+            $message = $e->getMessage();
+            $code = 403;
+        }
+
+        return response($payload, $remarks, $message, $code);
+    }
+
+    public function get_Customers_Current_Year()
+    {
+        $payload = [];
+        $code = 404;
+        $remarks = 'failed';
+        $message = 'Failed to get expenses from the database';
+
+        $sql2 = "SELECT count(transactions.id) AS totalCustomer, MONTH(transactions.created_at) AS month 
+        FROM transactions
+        WHERE YEAR(transactions.created_at) = YEAR(CURDATE())
+        AND transactions.is_deleted IS NULL 
+        GROUP BY MONTH(transactions.created_at);";
+
+        try {
+            if ($res2 = $this->pdo->query($sql2)->fetchAll()) {
+                $dataCurrentYear = array_fill(0, 12, 0);
+                foreach ($res2 as $currentyeardata) {
+                    $dataCurrentYear[$currentyeardata['month'] - 1] = $currentyeardata['totalCustomer'];
+                }
+                $payload = [
+                    date('Y') => $dataCurrentYear,
+                ];
+                $code = 200;
+                $remarks = "success";
+                $message = "Successfully retrieved expenses";
+            } else {
+                $message = 'No records found for expenses';
+            }
+        } catch (\PDOException $e) {
+            $message = $e->getMessage();
+            $code = 403;
+        }
+
+        return response($payload, $remarks, $message, $code);
+    }
+
+    public function get_Expenses_Current_Year()
+    {
+        $payload = [];
+        $code = 404;
+        $remarks = 'failed';
+        $message = 'Failed to get expenses from the database';
+
+        $sql2 = "SELECT SUM(purchases.quantityBought) as expenses, purchases.price, MONTH(purchases.created_at) AS month 
+        FROM purchases
+        WHERE YEAR(purchases.created_at) = YEAR(CURDATE())
+        AND purchases.is_deleted IS NULL 
+        GROUP BY MONTH(purchases.created_at);";
+
+        try {
+            $dataCurrentYear = array_fill(0, 12, 0);
+            if ($res2 = $this->pdo->query($sql2)->fetchAll()) {
+                $dataCurrentYear = array_fill(0, 12, 0);
+                foreach ($res2 as $currentyeardata) {
+                    $dataCurrentYear[$currentyeardata['month'] - 1] = $currentyeardata['expenses'] * $currentyeardata['price'];
+                }
+                $payload = [
+                    date('Y') => $dataCurrentYear,
+                ];
+                $code = 200;
+                $remarks = "success";
+                $message = "Successfully retrieved expenses";
+            } else {
+                $message = 'No records found for expenses';
+            }
         } catch (\PDOException $e) {
             $message = $e->getMessage();
             $code = 403;

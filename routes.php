@@ -67,10 +67,12 @@ class Route
                 'add-purchases' => json_encode($this->post->addPurchases($data)),
                 'add-transaction' => json_encode($this->post->addTransaction($data)),
                 'add-supplier' => json_encode($this->post->addSupplier($data)),
+                'refreshtoken' => json_encode($this->auth->refreshToken()),
                 default => errorMessage(403)
             };
         } catch (Exception $e) {
-            echo errorMessage(401);
+            // echo errorMessage(401);
+            echo $e;
 
             return;
         }
@@ -82,7 +84,9 @@ class Route
             echo match ($req[0]) {
                 'get-categories' => json_encode($this->get->get_Categories()),
                 'get-products' => json_encode($this->get->get_Products()),
+                'get-products-large' => json_encode($this->get->get_Products_Large()),
                 'get-purchases' => json_encode($this->get->get_Purchases()),
+                'get-transactions' => json_encode($this->get->get_Transactions()),
                 'get-suppliers' => json_encode($this->get->get_Suppliers()),
                 'get-orders-today' => json_encode($this->get->get_Orders_Today()),
                 'get-customers-today' => json_encode($this->get->get_Transactions_Today()),
@@ -97,6 +101,9 @@ class Route
                 'get-orders-curyear' => json_encode($this->get->get_Orders_Current_Year()),
                 'get-purchases-curyear' => json_encode($this->get->get_Purchases_Current_Year()),
                 'get-transactions-curyear' => json_encode($this->get->get_Transactions_Current_Year()),
+                'get-details-curyear' => json_encode($this->get->get_detail_Current_Year()),
+                'get-customer-curyear' => json_encode($this->get->get_Customers_Current_Year()),
+                'get-expenses-curyear' => json_encode($this->get->get_Expenses_Current_Year()),
                 'get-summary' => json_encode($this->get->summary()),
                 default => errorMessage(403)
             };
@@ -115,6 +122,8 @@ class Route
                 'update-orders' => json_encode($this->patch->updateTransaction($data)),
                 'update-product' => json_encode($this->patch->updateProduct($data)),
                 'update-supplier' => json_encode($this->patch->updateSupplier($data)),
+                'update-purchase' => json_encode($this->patch->updatePurchase($data)),
+                'delete-purchase' => json_encode($this->patch->deletePurchase($data)),
                 'delete-product' => json_encode($this->patch->deleteProduct($data)),
                 'delete-supplier' => json_encode($this->patch->deleteSupplier($data)),
                 'delete-order' => json_encode($this->patch->deleteTransaction($data)),

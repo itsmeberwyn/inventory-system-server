@@ -74,7 +74,7 @@ class Patch
                 $supplier->supplierName,
                 $supplier->contact,
                 $supplier->location,
-                $supplier->supplierId,
+                $supplier->id,
             ]);
 
             $count = $sql->rowCount();
@@ -182,19 +182,158 @@ class Patch
         return response($payload, $remarks, $message, $code);
     }
 
+    public function updatePurchase($purchase)
+    {
+        $payload = [];
+        $code = 424;
+        $remarks = 'failed';
+        $message = 'Failed to update transaction';
+
+        try {
+            $this->pdo->beginTransaction();
+
+            foreach ($purchase as $d) {
+                if ($d->id == 0) {
+                    $sql = "INSERT INTO purchases (purchaseSerialId,productId,supplierId,price,quantityBought) VALUES (?,?,?,?,?)";
+                    $sql = $this->pdo->prepare($sql);
+                    $sql->execute([
+                        $d->purchaseSerialId,
+                        $d->productId,
+                        $d->supplierId,
+                        $d->price,
+                        $d->quantityBought,
+                    ]);
+                } else {
+                    $sql = "UPDATE purchases SET quantityBought=?, is_deleted=? WHERE id=?";
+                    $sql = $this->pdo->prepare($sql);
+                    $sql->execute([
+                        $d->quantityBought,
+                        $d->is_deleted,
+                        $d->id,
+                    ]);
+                }
+            }
+
+            $count = $sql->rowCount();
+
+            if ($count) {
+                $payload = $purchase;
+                $code = 200;
+                $remarks = 'success';
+                $message = 'Purchase was updated successfully to the database.';
+            } else {
+                $payload = $purchase;
+                $code = 200;
+                $remarks = 'success';
+                $message = 'Nothing was updated to the database.';
+            }
+
+            $this->pdo->commit();
+            return response($payload, $remarks, $message, $code);
+        } catch (\PDOException $e) {
+            $this->pdo->rollback();
+            throw $e;
+        }
+
+        return response($payload, $remarks, $message, $code);
+    }
+
+
+    public function deletePurchase($purchase)
+    {
+        $payload = [];
+        $code = 400;
+        $remarks = 'failed';
+        $message = 'Failed to delete purchase to database';
+
+        try {
+            $this->pdo->beginTransaction();
+
+            $sql = 'UPDATE purchases SET is_deleted=? WHERE purchaseSerialId=? AND is_deleted IS NULL';
+
+            $sql = $this->pdo->prepare($sql);
+            $sql->execute([
+                1,
+                $purchase->purchaseId,
+            ]);
+
+            $count = $sql->rowCount();
+
+            if ($count) {
+                $payload = $purchase;
+                $code = 200;
+                $remarks = 'success';
+                $message = 'Purcjase was deleted successfully to the database.';
+            } else {
+                $payload = $purchase;
+                $code = 200;
+                $remarks = 'success';
+                $message = 'Nothing was deleted to the database.';
+            }
+
+            $this->pdo->commit();
+            return response($payload, $remarks, $message, $code);
+        } catch (\PDOException $e) {
+            $this->pdo->rollback();
+        }
+        return response($payload, $remarks, $message, $code);
+    }
+
     // pos
     // update
     public function updateOrder($orders)
     {
         foreach ($orders as $d) {
-            $sql = "UPDATE orders SET quantity=?, subTotal=? WHERE id=?";
+            if ($d->orderId != 0) {
+                if ($d->quantity > $d->origQuantity && $d->is_deleted !== 1) {
+                    $updateSql = "UPDATE products SET quantity=quantity-? WHERE id=?";
+                    $updateSql = $this->pdo->prepare($updateSql);
+                    $updateSql->execute([
+                        abs($d->quantity - $d->origQuantity),
+                        $d->productId,
+                    ]);
+                } else if ($d->quantity < $d->origQuantity && $d->is_deleted !== 1) {
+                    $updateSql = "UPDATE products SET quantity=quantity+? WHERE id=?";
+                    $updateSql = $this->pdo->prepare($updateSql);
+                    $updateSql->execute([
+                        abs($d->quantity - $d->origQuantity),
+                        $d->productId,
+                    ]);
+                }
 
-            $sql = $this->pdo->prepare($sql);
-            $sql->execute([
-                $d->quantity,
-                $d->subTotal,
-                $d->orderId,
-            ]);
+                if ($d->is_deleted === 1) {
+                    $updateSql = "UPDATE products SET quantity=quantity+? WHERE id=?";
+                    $updateSql = $this->pdo->prepare($updateSql);
+                    $updateSql->execute([
+                        abs($d->origQuantity),
+                        $d->productId,
+                    ]);
+                }
+
+                $sql = "UPDATE orders SET quantity=?, subTotal=?, is_deleted=? WHERE id=?";
+
+
+                $sql = $this->pdo->prepare($sql);
+                $sql->execute([
+                    $d->quantity,
+                    $d->subTotal,
+                    $d->is_deleted,
+                    $d->orderId,
+                ]);
+            } else {
+                $updateSql = "UPDATE products SET quantity=quantity-$d->quantity WHERE id=$d->productId";
+                $updateSql = $this->pdo->prepare($updateSql);
+                $updateSql->execute([]);
+
+                $sql = "INSERT INTO orders (productId, transactionId, quantity, subTotal) VALUES (?,?,?,?)";
+                $sql = $this->pdo->prepare($sql);
+                $sql->execute([
+                    $d->productId,
+                    $d->transactionId,
+                    $d->quantity,
+                    $d->subTotal,
+                ]);
+            }
         }
 
         $count = $sql->rowCount();
