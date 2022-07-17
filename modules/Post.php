@@ -89,6 +89,13 @@ class Post
                 $insert_values[] = $d->supplierId;
                 $insert_values[] = $d->price;
                 $insert_values[] = $d->quantityBought;
+
+                $updateSQL = "UPDATE products SET quantity=quantity+? WHERE id=?";
+                $sql = $this->pdo->prepare($updateSQL);
+                $sql->execute([
+                    $d->quantityBought,
+                    $d->productId,
+                ]);
             }
 
             $sql = "INSERT INTO purchases (" . implode(",", $datafields) . ") VALUES " .

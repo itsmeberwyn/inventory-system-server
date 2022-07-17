@@ -50,10 +50,11 @@ class Auth extends AuthMiddleware
         $remarks = 'failed';
         $message = 'The username or password is incorrect';
 
-        $sql = "SELECT * FROM users WHERE username = ? LIMIT 1";
+        $sql = "SELECT * FROM users WHERE username = ? AND role = ? LIMIT 1";
         $sql = $this->pdo->prepare($sql);
         $sql->execute([
-            $data->username
+            $data->username,
+            $data->role
         ]);
 
         $res = $sql->fetch(PDO::FETCH_ASSOC);
@@ -63,7 +64,7 @@ class Auth extends AuthMiddleware
             $jwt = $this->generate_jwt($res['username']);
 
             $cookie_options = array(
-                'expires' => time() + 600,
+                'expires' => time() + 3600,
                 'path' => '/',
                 'httpOnly' => true,
                 'secure' => true,

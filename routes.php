@@ -68,6 +68,7 @@ class Route
                 'add-transaction' => json_encode($this->post->addTransaction($data)),
                 'add-supplier' => json_encode($this->post->addSupplier($data)),
                 'refreshtoken' => json_encode($this->auth->refreshToken()),
+                'logout' => json_encode($this->auth->admin_logout()),
                 default => errorMessage(403)
             };
         } catch (Exception $e) {
