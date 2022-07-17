@@ -101,6 +101,9 @@ class Route
                 'get-orders-curyear' => json_encode($this->get->get_Orders_Current_Year()),
                 'get-purchases-curyear' => json_encode($this->get->get_Purchases_Current_Year()),
                 'get-transactions-curyear' => json_encode($this->get->get_Transactions_Current_Year()),
+                'get-details-curyear' => json_encode($this->get->get_detail_Current_Year()),
+                'get-customer-curyear' => json_encode($this->get->get_Customers_Current_Year()),
+                'get-expenses-curyear' => json_encode($this->get->get_Expenses_Current_Year()),
                 'get-summary' => json_encode($this->get->summary()),
                 default => errorMessage(403)
             };
