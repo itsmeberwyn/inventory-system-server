@@ -82,11 +82,11 @@ class Post
             $this->pdo->beginTransaction();
 
             $insert_values = array();
-            foreach ($product as $d) {
+            foreach ($product->data as $d) {
                 $question_marks[] = '('  . $this->placeholders('?', sizeof($datafields)) . ')';
                 $insert_values[] = $d->purchaseSerialId;
                 $insert_values[] = $d->productId;
-                $insert_values[] = $d->supplierId;
+                $insert_values[] = $product->supplierId;
                 $insert_values[] = $d->price;
                 $insert_values[] = $d->quantityBought;
 
