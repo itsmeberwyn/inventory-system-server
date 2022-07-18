@@ -1,6 +1,8 @@
 <?php
 
-class Patch
+require_once('./middleware/Auth.Middleware.php');
+
+class Patch extends AuthMiddleware
 {
     protected PDO $pdo;
 
