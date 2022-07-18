@@ -131,7 +131,8 @@ class Route
                 default => errorMessage(403)
             };
         } catch (Exception $e) {
-            echo errorMessage(401);
+            // echo errorMessage(401);
+            echo $e;
             return;
         }
     }
