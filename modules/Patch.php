@@ -194,6 +194,10 @@ class Patch
 
             foreach ($purchase as $d) {
                 if ($d->id == 0) {
+                    $updateSql = "UPDATE products SET quantity=quantity+$d->quantityBought WHERE id=$d->productId";
+                    $updateSql = $this->pdo->prepare($updateSql);
+                    $updateSql->execute([]);
+
                     $sql = "INSERT INTO purchases (purchaseSerialId,productId,supplierId,price,quantityBought) VALUES (?,?,?,?,?)";
                     $sql = $this->pdo->prepare($sql);
                     $sql->execute([
@@ -204,6 +208,31 @@ class Patch
                         $d->quantityBought,
                     ]);
                 } else {
+                    if ($d->quantityBought > $d->actualQuantity && $d->is_deleted !== 1) {
+                        $updateSql = "UPDATE products SET quantity=quantity+? WHERE id=?";
+                        $updateSql = $this->pdo->prepare($updateSql);
+                        $updateSql->execute([
+                            abs($d->quantityBought - $d->actualQuantity),
+                            $d->productId,
+                        ]);
+                    } else if ($d->quantityBought < $d->actualQuantity && $d->is_deleted !== 1) {
+                        $updateSql = "UPDATE products SET quantity=quantity-? WHERE id=?";
+                        $updateSql = $this->pdo->prepare($updateSql);
+                        $updateSql->execute([
+                            abs($d->quantityBought - $d->actualQuantity),
+                            $d->productId,
+                        ]);
+                    }
+
+                    if ($d->is_deleted === 1) {
+                        $updateSql = "UPDATE products SET quantity=quantity-? WHERE id=?";
+                        $updateSql = $this->pdo->prepare($updateSql);
+                        $updateSql->execute([
+                            abs($d->actualQuantity),
+                            $d->productId,
+                        ]);
+                    }
+
                     $sql = "UPDATE purchases SET quantityBought=?, is_deleted=? WHERE id=?";
                     $sql = $this->pdo->prepare($sql);
                     $sql->execute([
@@ -215,8 +244,9 @@ class Patch
             }
 
             $count = $sql->rowCount();
+            $count1 = $updateSql->rowCount();
 
-            if ($count) {
+            if ($count || $count1) {
                 $payload = $purchase;
                 $code = 200;
                 $remarks = 'success';
@@ -250,11 +280,18 @@ class Patch
             $this->pdo->beginTransaction();
 
             $sql = 'UPDATE purchases SET is_deleted=? WHERE purchaseSerialId=? AND is_deleted IS NULL';
+            $sql1 = 'UPDATE products SET quantity=quantity-? WHERE id=? AND is_deleted IS NULL';
 
             $sql = $this->pdo->prepare($sql);
             $sql->execute([
                 1,
                 $purchase->purchaseId,
+            ]);
+
+            $sql1 = $this->pdo->prepare($sql1);
+            $sql1->execute([
+                $purchase->quantity,
+                $purchase->productId,
             ]);
 
             $count = $sql->rowCount();
@@ -398,6 +435,16 @@ class Patch
             $this->pdo->beginTransaction();
 
             $sql = 'UPDATE transactions SET is_deleted=? WHERE id=? AND is_deleted IS NULL';
+            $sql1 = 'UPDATE orders SET is_deleted=? WHERE transactionId=? AND is_deleted IS NULL';
+
+            foreach ($order->data as $data) {
+                $sql2 = 'UPDATE products SET quantity=quantity+? WHERE id=? AND is_deleted IS NULL';
+                $sql2 = $this->pdo->prepare($sql2);
+                $sql2->execute([
+                    $data->quantity,
+                    $data->productId,
+                ]);
+            }
 
             $sql = $this->pdo->prepare($sql);
             $sql->execute([
@@ -405,9 +452,16 @@ class Patch
                 $order->orderId,
             ]);
 
-            $count = $sql->rowCount();
+            $sql1 = $this->pdo->prepare($sql1);
+            $sql1->execute([
+                1,
+                $order->orderId,
+            ]);
 
-            if ($count) {
+            $count = $sql->rowCount();
+            $count1 = $sql1->rowCount();
+
+            if ($count && $count1) {
                 $payload = $order;
                 $code = 200;
                 $remarks = 'success';
