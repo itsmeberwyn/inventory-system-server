@@ -57,7 +57,7 @@ class Route
 
     public function PostRequest($req): void
     {
-        $data = json_decode(file_get_contents('php://input'));
+        $data = json_decode(base64_decode(file_get_contents('php://input')));
 
         try {
             echo match ($req[0]) {
@@ -72,9 +72,7 @@ class Route
                 default => errorMessage(403)
             };
         } catch (Exception $e) {
-            // echo errorMessage(401);
-            echo $e;
-
+            echo errorMessage(401);
             return;
         }
     }
@@ -82,7 +80,7 @@ class Route
     public function GetRequest($req): void
     {
         try {
-            echo match ($req[0]) {
+            echo json_encode(["data" => base64_encode(json_encode(match ($req[0]) {
                 'get-categories' => json_encode($this->get->AuthMiddleware()->get_Categories()),
                 'get-products' => json_encode($this->get->AuthMiddleware()->get_Products()),
                 'get-products-large' => json_encode($this->get->AuthMiddleware()->get_Products_Large()),
@@ -107,7 +105,7 @@ class Route
                 'get-expenses-curyear' => json_encode($this->get->AuthMiddleware()->get_Expenses_Current_Year()),
                 'get-summary' => json_encode($this->get->AuthMiddleware()->summary()),
                 default => errorMessage(403)
-            };
+            }))]);
         } catch (Exception $e) {
             echo errorMessage(401);
             return;
@@ -116,7 +114,7 @@ class Route
 
     public function PatchRequest($req): void
     {
-        $data = json_decode(file_get_contents('php://input'));
+        $data = json_decode(base64_decode(file_get_contents('php://input')));
 
         try {
             echo match ($req[0]) {

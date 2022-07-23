@@ -154,7 +154,7 @@ class Auth extends AuthMiddleware
     public function admin_logout()
     {
         $payload = [];
-        $code = 500;
+        $code = 200;
         $remarks = 'failed';
         $message = 'There was an error on the server. Please try again later';
 
