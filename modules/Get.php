@@ -519,7 +519,7 @@ class Get extends AuthMiddleware
     public function get_Purchases_Current_Last_Year()
     {
         $payload = [];
-        $code = 404;
+        $code = 200;
         $remarks = 'failed';
         $message = 'Failed to get expenses from the database';
 

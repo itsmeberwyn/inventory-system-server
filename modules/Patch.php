@@ -1,6 +1,8 @@
 <?php
 
-class Patch
+require_once('./middleware/Auth.Middleware.php');
+
+class Patch extends AuthMiddleware
 {
     protected PDO $pdo;
 
@@ -233,9 +235,10 @@ class Patch
                         ]);
                     }
 
-                    $sql = "UPDATE purchases SET quantityBought=?, is_deleted=? WHERE id=?";
+                    $sql = "UPDATE purchases SET price=?, quantityBought=?, is_deleted=? WHERE id=?";
                     $sql = $this->pdo->prepare($sql);
                     $sql->execute([
+                        $d->price,
                         $d->quantityBought,
                         $d->is_deleted,
                         $d->id,
@@ -244,9 +247,8 @@ class Patch
             }
 
             $count = $sql->rowCount();
-            $count1 = $updateSql->rowCount();
 
-            if ($count || $count1) {
+            if ($count) {
                 $payload = $purchase;
                 $code = 200;
                 $remarks = 'success';

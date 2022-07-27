@@ -1,5 +1,8 @@
 <?php
-class Post
+
+require_once('./middleware/Auth.Middleware.php');
+
+class Post extends AuthMiddleware
 {
     protected $pdo;
 
