@@ -61,14 +61,14 @@ class Route
 
         try {
             echo match ($req[0]) {
-                'admin-register' => json_encode($this->auth->admin_register($data)),
-                'admin-login' => json_encode($this->auth->admin_login($data)),
-                'add-product' => json_encode($this->post->AuthMiddleware()->addProduct($data)),
-                'add-purchases' => json_encode($this->post->AuthMiddleware()->addPurchases($data)),
-                'add-transaction' => json_encode($this->post->AuthMiddleware()->addTransaction($data)),
-                'add-supplier' => json_encode($this->post->AuthMiddleware()->addSupplier($data)),
-                'refreshtoken' => json_encode($this->auth->refreshToken()),
-                'logout' => json_encode($this->auth->admin_logout()),
+                'L2FkbWluLXJlZ2lzdGVy' => json_encode($this->auth->admin_register($data)),
+                'L2FkbWluLWxvZ2lu' => json_encode($this->auth->admin_login($data)),
+                'L2FkZC1wcm9kdWN0' => json_encode($this->post->AuthMiddleware()->addProduct($data)),
+                'L2FkZC1wdXJjaGFzZXM=' => json_encode($this->post->AuthMiddleware()->addPurchases($data)),
+                'L2FkZC10cmFuc2FjdGlvbg==' => json_encode($this->post->AuthMiddleware()->addTransaction($data)),
+                'L2FkZC1zdXBwbGllcg==' => json_encode($this->post->AuthMiddleware()->addSupplier($data)),
+                'L3JlZnJlc2h0b2tlbg==' => json_encode($this->auth->refreshToken()),
+                'L2xvZ291dA==' => json_encode($this->auth->admin_logout()),
                 default => errorMessage(403)
             };
         } catch (Exception $e) {
@@ -81,29 +81,29 @@ class Route
     {
         try {
             echo json_encode(["data" => base64_encode(json_encode(match ($req[0]) {
-                'get-categories' => json_encode($this->get->AuthMiddleware()->get_Categories()),
-                'get-products' => json_encode($this->get->AuthMiddleware()->get_Products()),
-                'get-products-large' => json_encode($this->get->AuthMiddleware()->get_Products_Large()),
-                'get-purchases' => json_encode($this->get->AuthMiddleware()->get_Purchases()),
-                'get-transactions' => json_encode($this->get->AuthMiddleware()->get_Transactions()),
-                'get-suppliers' => json_encode($this->get->AuthMiddleware()->get_Suppliers()),
-                'get-orders-today' => json_encode($this->get->AuthMiddleware()->get_Orders_Today()),
-                'get-customers-today' => json_encode($this->get->AuthMiddleware()->get_Transactions_Today()),
-                'get-topselling-today' => json_encode($this->get->AuthMiddleware()->get_Top_Selling_Products_Today()),
-                'get-topsellingcat-today' => json_encode($this->get->AuthMiddleware()->get_Sales_By_Categories_Today()),
-                'get-topselling-month' => json_encode($this->get->AuthMiddleware()->get_Top_Selling_Products_Month()),
-                'get-topsellingcat-month' => json_encode($this->get->AuthMiddleware()->get_Sales_By_Categories_Month()),
-                'get-sales-month' => json_encode($this->get->AuthMiddleware()->get_Transactions_Month()),
-                'get-sales-year' => json_encode($this->get->AuthMiddleware()->get_Transactions_Current_Last_Year()),
-                'get-expenses-year' => json_encode($this->get->AuthMiddleware()->get_Purchases_Current_Last_Year()),
-                'get-customers-year' => json_encode($this->get->AuthMiddleware()->get_Customers_Current_Last_Year()),
-                'get-orders-curyear' => json_encode($this->get->AuthMiddleware()->get_Orders_Current_Year()),
-                'get-purchases-curyear' => json_encode($this->get->AuthMiddleware()->get_Purchases_Current_Year()),
-                'get-transactions-curyear' => json_encode($this->get->AuthMiddleware()->get_Transactions_Current_Year()),
-                'get-details-curyear' => json_encode($this->get->AuthMiddleware()->get_detail_Current_Year()),
-                'get-customer-curyear' => json_encode($this->get->AuthMiddleware()->get_Customers_Current_Year()),
-                'get-expenses-curyear' => json_encode($this->get->AuthMiddleware()->get_Expenses_Current_Year()),
-                'get-summary' => json_encode($this->get->AuthMiddleware()->summary()),
+                'L2dldC1jYXRlZ29yaWVz' => json_encode($this->get->AuthMiddleware()->get_Categories()),
+                'L2dldC1wcm9kdWN0cw==' => json_encode($this->get->AuthMiddleware()->get_Products()),
+                'L2dldC1wcm9kdWN0cy1sYXJnZQ==' => json_encode($this->get->AuthMiddleware()->get_Products_Large()),
+                'L2dldC1wdXJjaGFzZXM=' => json_encode($this->get->AuthMiddleware()->get_Purchases()),
+                'L2dldC10cmFuc2FjdGlvbnM=' => json_encode($this->get->AuthMiddleware()->get_Transactions()),
+                'L2dldC1zdXBwbGllcnM=' => json_encode($this->get->AuthMiddleware()->get_Suppliers()),
+                'L2dldC1vcmRlcnMtdG9kYXk=' => json_encode($this->get->AuthMiddleware()->get_Orders_Today()),
+                'L2dldC1jdXN0b21lcnMtdG9kYXk=' => json_encode($this->get->AuthMiddleware()->get_Transactions_Today()),
+                'L2dldC10b3BzZWxsaW5nLXRvZGF5' => json_encode($this->get->AuthMiddleware()->get_Top_Selling_Products_Today()),
+                'L2dldC10b3BzZWxsaW5nY2F0LXRvZGF5' => json_encode($this->get->AuthMiddleware()->get_Sales_By_Categories_Today()),
+                'L2dldC10b3BzZWxsaW5nLW1vbnRo' => json_encode($this->get->AuthMiddleware()->get_Top_Selling_Products_Month()),
+                'L2dldC10b3BzZWxsaW5nY2F0LW1vbnRo' => json_encode($this->get->AuthMiddleware()->get_Sales_By_Categories_Month()),
+                'L2dldC1zYWxlcy1tb250aA==' => json_encode($this->get->AuthMiddleware()->get_Transactions_Month()),
+                'L2dldC1zYWxlcy15ZWFy' => json_encode($this->get->AuthMiddleware()->get_Transactions_Current_Last_Year()),
+                'L2dldC1leHBlbnNlcy15ZWFy' => json_encode($this->get->AuthMiddleware()->get_Purchases_Current_Last_Year()),
+                'L2dldC1jdXN0b21lcnMteWVhcg==' => json_encode($this->get->AuthMiddleware()->get_Customers_Current_Last_Year()),
+                'L2dldC1vcmRlcnMtY3VyeWVhcg==' => json_encode($this->get->AuthMiddleware()->get_Orders_Current_Year()),
+                'L2dldC1wdXJjaGFzZXMtY3VyeWVhcg==' => json_encode($this->get->AuthMiddleware()->get_Purchases_Current_Year()),
+                'L2dldC10cmFuc2FjdGlvbnMtY3VyeWVhcg==' => json_encode($this->get->AuthMiddleware()->get_Transactions_Current_Year()),
+                'L2dldC1kZXRhaWxzLWN1cnllYXI=' => json_encode($this->get->AuthMiddleware()->get_detail_Current_Year()),
+                'L2dldC1jdXN0b21lci1jdXJ5ZWFy' => json_encode($this->get->AuthMiddleware()->get_Customers_Current_Year()),
+                'L2dldC1leHBlbnNlcy1jdXJ5ZWFy' => json_encode($this->get->AuthMiddleware()->get_Expenses_Current_Year()),
+                'L2dldC1zdW1tYXJ5' => json_encode($this->get->AuthMiddleware()->summary()),
                 default => errorMessage(403)
             }))]);
         } catch (Exception $e) {
@@ -118,14 +118,14 @@ class Route
 
         try {
             echo match ($req[0]) {
-                'update-orders' => json_encode($this->patch->AuthMiddleware()->updateTransaction($data)),
-                'update-product' => json_encode($this->patch->AuthMiddleware()->updateProduct($data)),
-                'update-supplier' => json_encode($this->patch->AuthMiddleware()->updateSupplier($data)),
-                'update-purchase' => json_encode($this->patch->AuthMiddleware()->updatePurchase($data)),
-                'delete-purchase' => json_encode($this->patch->AuthMiddleware()->deletePurchase($data)),
-                'delete-product' => json_encode($this->patch->AuthMiddleware()->deleteProduct($data)),
-                'delete-supplier' => json_encode($this->patch->AuthMiddleware()->deleteSupplier($data)),
-                'delete-order' => json_encode($this->patch->AuthMiddleware()->deleteTransaction($data)),
+                'L3VwZGF0ZS1vcmRlcnM=' => json_encode($this->patch->AuthMiddleware()->updateTransaction($data)),
+                'L3VwZGF0ZS1wcm9kdWN0' => json_encode($this->patch->AuthMiddleware()->updateProduct($data)),
+                'L3VwZGF0ZS1zdXBwbGllcg==' => json_encode($this->patch->AuthMiddleware()->updateSupplier($data)),
+                'L3VwZGF0ZS1wdXJjaGFzZQ==' => json_encode($this->patch->AuthMiddleware()->updatePurchase($data)),
+                'L2RlbGV0ZS1wdXJjaGFzZQ==' => json_encode($this->patch->AuthMiddleware()->deletePurchase($data)),
+                'L2RlbGV0ZS1wcm9kdWN0' => json_encode($this->patch->AuthMiddleware()->deleteProduct($data)),
+                'L2RlbGV0ZS1zdXBwbGllcg==' => json_encode($this->patch->AuthMiddleware()->deleteSupplier($data)),
+                'L2RlbGV0ZS1vcmRlcg==' => json_encode($this->patch->AuthMiddleware()->deleteTransaction($data)),
                 default => errorMessage(403)
             };
         } catch (Exception $e) {
